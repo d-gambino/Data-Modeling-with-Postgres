@@ -10,6 +10,13 @@ from sql_queries import *
 
 
 def process_song_file(cur, filepath):
+    """ Processes song file, assigns data to three separate Pandas dataframes
+            df: a direct read of the JSON file
+            song_data: 'song_id', 'title', 'artist_id', 'year', 'duration'
+            artist_data: 'artist_id', 'artist_name', 'artist_location', 'artist_latitude', 'artist_longitude'
+        
+        Excutes song_table_insert and artist_table_insert to store data in respective Postgres tables.
+    """
     # open song file
     df = pd.read_json(filepath,lines=True)
 
@@ -23,6 +30,15 @@ def process_song_file(cur, filepath):
 
 
 def process_log_file(cur, filepath):
+    """ Processes log file, assigns data to four separate Pandas dataframes
+            df: a direct read of the JSON file, filtered by "NextSong" action
+            time_df: 'time','hour','day','week','month','year','weekday_name'
+            user_df: 'userId','firstName','lastName','gender','level'
+            songplay_data: 'timestamp','userId','level','songid','artistid','sessionId','location','userAgent'
+            
+        Excutes time_table_insert, user_table_insert, and songplay_table_insert to store data in respective Postgres tables.
+
+    """ 
     # open log file
     df = pd.read_json(filepath,lines=True)
 
@@ -66,6 +82,17 @@ def process_log_file(cur, filepath):
 
 
 def process_data(cur, conn, filepath, func):
+    """
+    Appends all JSON files in a given directory to a list. Each filepath in the list
+    is then passed as an argument to the provided function that will extract the
+    appropriate data.
+    
+    Arguments:
+        cur: a cursor to perform the database operations
+        conn: database connection
+        filepath: path to the data directory
+        func: function to process the data file
+    """
     # get all files matching extension from directory
     all_files = []
     for root, dirs, files in os.walk(filepath):
@@ -85,6 +112,9 @@ def process_data(cur, conn, filepath, func):
 
 
 def main():
+    """
+    Calls process_data function for both main data directories.
+    """
     conn = psycopg2.connect("host=127.0.0.1 dbname=sparkifydb user=student password=student")
     cur = conn.cursor()
 
